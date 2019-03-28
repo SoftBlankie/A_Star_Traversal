@@ -1,4 +1,5 @@
-from random import choice, shuffle, randrange
+from random import choice, shuffle, randint
+import pygame
 
 def make_empty_grid(x, y):
     grid = []
@@ -9,44 +10,91 @@ def make_empty_grid(x, y):
         grid.append(row)
     return grid
 
-def get_neighbors(x, y, xmax, ymax grid):
+def get_neighbors(x, y, xlen, ylen, grid):
     neighbors = []
 
     if x > 1 and grid[x-2][y] == 1:
         neighbors.append((x-2, y))
-    if x < ymax-2 and grid[x+2][y] == 1:
+    if x < xlen-2 and grid[x+2][y] == 1:
         neighbors.append((x+2, y))
     if y > 1 and grid[x][y-2] == 1:
         neighbors.append((x, y-2))
-    if y < xmax-2 and grid[x][y+2] == 1:
+    if y < ylen-2 and grid[x][y+2] == 1:
         neighbors.append((x, y+2))
 
-    random.shuffle(neighbors)
+    shuffle(neighbors)
 
     return neighbors
 
-def generate(xmax, ymax):
+def handleInputEvents():
+    for event in pygame.event.get():
+        if (event.type == pygame.KEYDOWN):
+            if (event.key == pygame.K_ESCAPE):
+                exit(0)
+
+def generate(xlen, ylen):
     # Pick random cell
-    grid = make_empty_grid(xmax, ymax)
-    x,y = (randrange(1, xmax, 2), randrange(1, ymax), 2)
-    
+    grid = make_empty_grid(xlen, ylen)
+    x,y = (randint(1, xlen-1), randint(1, ylen-1))
+   
     grid[x][y] = 0
-    cells = [grid[x][y]]
-    
+    cells = [(x, y)]
+   
     # until no more neighbors
     while cells:
+        handleInputEvents()      
+        
+        #x,y = cells[-1]
         x,y = choice(cells)
 
         # backtrack to visited
-        neighbors = get_neighbors(x, y, grid)
+        neighbors = get_neighbors(x, y, xlen, ylen, grid)
         if len(neighbors) == 0:
             cells = [c for c in cells if c != (x, y)]
             continue
 
         nx,ny = choice(neighbors)
         cells += [(nx, ny)]
-
+        
         grid[nx][ny] = 0
         grid[(x + nx) // 2][(y + ny) // 2] = 0
 
     return grid
+
+'''
+def generate(xlen, ylen):
+    # Pick random cell
+    grid = make_empty_grid(xlen, ylen)
+    x,y = (randint(1, xlen-1), randint(1, ylen-1))
+    
+    cells = [(x, y)]
+   
+    # until no more cells
+    while cells:
+        handleInputEvents()      
+        
+        # backtrack
+        x,y = cells[-1]
+
+        # prim
+        #x,y = choice(cells)
+
+        index = True
+
+        # check neighbors
+        neighbor_cells = [(x-1, y+0), (x+1, y+0), (x+0,y-1), (x+0,y+1)]
+        shuffle(neighbor_cells)
+        for nx,ny in neighbor_cells:
+            if (nx > 0 and ny > 0 and nx < xlen-1 and ny < ylen-1
+                    and grid[nx][ny] == 1):
+                grid[x][y] = 0
+                grid[nx][ny] = 0
+                cells += [(nx, ny)]
+                index = False
+                break
+
+        if (index):
+            cells.remove((x, y))
+
+    return grid
+'''
