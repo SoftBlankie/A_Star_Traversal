@@ -1,1 +1,1 @@
-# A_Star_Traversal
+# Maze traversal
