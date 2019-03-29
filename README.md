@@ -2,7 +2,10 @@
 
 Maze traversal using Python and Pygame
 
-![keyword]()
+![keyword](https://github.com/SoftBlankie/Maze_traversal/blob/master/screen_shots/screen_shot_1.png)
+![keyword](https://github.com/SoftBlankie/Maze_traversal/blob/master/screen_shots/screen_shot_3.png)
+![keyword](https://github.com/SoftBlankie/Maze_traversal/blob/master/screen_shots/screen_shot_5.png)
+![keyword](https://github.com/SoftBlankie/Maze_traversal/blob/master/screen_shots/screen_shot_7.png)
 
 This program implements its own maze generator as well as solver. Currently implemented is the growing tree maze generator and the A* maze traverser.
 
