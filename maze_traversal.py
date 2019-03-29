@@ -1,12 +1,11 @@
 from time import sleep
-from growing_tree import generate
+from random import randint
+from growing_tree import generate_gt
 from A_star import astar
 import pygame
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (240, 128, 128)
-GREEN = (0, 255, 127)
 
 def createScreen():
     screen_width, screen_height = pygame.display.list_modes(0)[0]
@@ -17,60 +16,62 @@ def createScreen():
     print("screen size: ", screen.get_size())
     return screen
 
-def draw_wall(x, y, block_size, cell_color):
-    x *= block_size
-    y *= block_size
-    pygame.draw.rect(screen, cell_color, (x, y, block_size, block_size))
-
-def draw_path(x, y, block_size, cell_color):
-    x *= block_size
-    y *= block_size
-    pygame.draw.rect(screen, cell_color, (x, y, block_size, block_size))
-
-def traceback(x, y, block_size, cell_color):
-    x *= block_size
-    y *= block_size
-    center = ((x + block_size // 2)), (y + (block_size // 2))
-    pygame.draw.circle(screen, cell_color, center, block_size // 2,0)
-
+'''
+Left click : Create or remove wall
+Spacebar : Create new maze
+Escape : Quit
+'''
 def handleInputEvents():
     for event in pygame.event.get():
-        if (event.type == pygame.MOUSEBUTTONDOWN):
-            if (event.button == 1):
-                (xMouse,yMouse) = pygame.mouse.get_pos()
-                maze[xMouse][yMouse] = 1
-        elif (event.type == pygame.KEYDOWN):
+        if (event.type == pygame.KEYDOWN):
             if (event.key == pygame.K_ESCAPE):
                 exit(0)
+            elif (event.key == pygame.K_SPACE):
+                screen.fill(WHITE)
+                runMaze()
         elif (event.type == pygame.QUIT):
             print("quitting")
             exit(0)
 
+def runMaze():
+    global maze
+
+    maze = generate_gt(xlen, ylen, screen, block_size, bktrk_chce)
+    
+    start = (randint(1, 5), randint(1, 5))
+    end = (randint(xlen-5, xlen-1), randint(ylen-5, ylen-1))
+
+    while (maze[start[0]][start[1]] == 1):
+        start = (randint(1, 5), randint(1, 5))
+    while (maze[end[0]][end[1]] == 1):
+        end = (randint(xlen-5, xlen-1), randint(ylen-5, ylen-1))
+
+    path = astar(maze, start, end, screen, block_size)
+
 def main():
-    global screen, maze
+    global screen, xlen, ylen, start, end, block_size, bktrk_chce
+
+    bktrk_chce = -1
+    while (bktrk_chce < 0 or bktrk_chce > 1.0):
+        bktrk_chce = float(input("Backtrack chance (0.0 - 1.0): "))
 
     pygame.init()
     pygame.display.set_caption("Maze Traversal")
     clock = pygame.time.Clock()
     screen = createScreen()
+    screen.fill(WHITE)
     (xmax,ymax) = screen.get_size()
     xlen = xmax // 9
     ylen = ymax // 9
 
     block_size = 9
     
-    maze = generate(xlen, ylen)
+    runMaze()
 
     while True:
-        for x in range(xlen):
-            for y in range(ylen):
-                handleInputEvents()
-                
-                wall = maze[x][y]
-                cell_color = WHITE if wall else BLACK
-                draw_wall(x, y, block_size, cell_color)
+        handleInputEvents()
+        clock.tick(60)
 
-                clock.tick(60)
-                pygame.display.flip()
+        pygame.display.flip()
 
 main()

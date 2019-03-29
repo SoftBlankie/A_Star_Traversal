@@ -1,5 +1,8 @@
-from random import choice, shuffle, randint
+from random import choice, shuffle, random, randint
 import pygame
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 def make_empty_grid(x, y):
     grid = []
@@ -9,6 +12,16 @@ def make_empty_grid(x, y):
             row.append(1)
         grid.append(row)
     return grid
+
+def carve_wall(x, y, screen, block_size):
+    wall = grid[x][y]
+    cell_color = WHITE if wall else BLACK
+    draw_wall(x, y, screen, block_size, cell_color)
+
+def draw_wall(x, y, screen, block_size, cell_color):
+    x *= block_size
+    y *= block_size
+    pygame.draw.rect(screen, cell_color, (x, y, block_size, block_size))
 
 def get_neighbors(x, y, xlen, ylen, grid):
     neighbors = []
@@ -32,20 +45,24 @@ def handleInputEvents():
             if (event.key == pygame.K_ESCAPE):
                 exit(0)
 
-def generate(xlen, ylen):
+def generate_gt(xlen, ylen, screen, block_size, bktrk_chce):
+    global grid
+
     # Pick random cell
     grid = make_empty_grid(xlen, ylen)
     x,y = (randint(1, xlen-1), randint(1, ylen-1))
    
     grid[x][y] = 0
     cells = [(x, y)]
-   
+
     # until no more neighbors
     while cells:
         handleInputEvents()      
         
-        #x,y = cells[-1]
-        x,y = choice(cells)
+        if (random() < bktrk_chce):
+            x,y = cells[-1]
+        else:
+            x,y = choice(cells)
 
         # backtrack to visited
         neighbors = get_neighbors(x, y, xlen, ylen, grid)
@@ -59,8 +76,15 @@ def generate(xlen, ylen):
         grid[nx][ny] = 0
         grid[(x + nx) // 2][(y + ny) // 2] = 0
 
+        carve_wall(x, y, screen, block_size)
+        carve_wall(nx, ny, screen, block_size)
+        carve_wall((x + nx) // 2, (y + ny) // 2, screen, block_size)
+
+        pygame.display.flip()
+
     return grid
 
+# Theory
 '''
 def generate(xlen, ylen):
     # Pick random cell
